@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,21 +17,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class ScheduledImmoScoutParser {
-    private static final Logger log = LoggerFactory.getLogger(ScheduledImmoScoutParser.class);
+public class ImmoScoutProvider implements Flatprovider {
+    private static final Logger log = LoggerFactory.getLogger(ImmoScoutProvider.class);
 
     private final OfferRepository offerRepository;
-    private final NotificationService notificationService;
+
+    @Value("${immoscout.url}")
+    private String url;
 
     @Autowired
-    public ScheduledImmoScoutParser(OfferRepository offerRepository, NotificationService notificationService) {
+    public ImmoScoutProvider(OfferRepository offerRepository) {
         this.offerRepository = offerRepository;
-        this.notificationService = notificationService;
     }
 
-    @Scheduled(fixedRate = 300000)
-    public void parsePage() throws IOException {
-        String url = "https://www.immobilienscout24.de/Suche/S-2/Wohnung-Miete/Umkreissuche/Hamburg/-/1840/2621814/-/1276006001/4/2,00-/50,00-/EURO--600,00/-/-/-/-/-/true";
+    public Set<OfferEntity> getNewOffers() throws IOException {
         Document doc = Jsoup.connect(url).get();
         Elements elementsByAttribute = doc.getElementsByAttribute("data-go-to-expose-id");
         Set<OfferEntity> offers = elementsByAttribute.stream()
@@ -41,12 +41,10 @@ public class ScheduledImmoScoutParser {
                 .map(OfferEntity::of)
                 .collect(Collectors.toSet());
 
-        if (!offers.isEmpty()) {
-            offerRepository.saveAll(offers);
-            notificationService.notify(offers);
-        }
+        offerRepository.save(offers);
+        log.info("Immoscout Page parsed");
 
-        log.debug("Immoscout Page parsed");
+        return offers;
     }
 
 }

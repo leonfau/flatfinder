@@ -1,8 +1,11 @@
 package de.leon.flatfinder.entities;
 
+import lombok.Data;
+
 import javax.persistence.*;
 
 @Entity
+@Data
 public class OfferEntity {
 
     @Id
@@ -18,19 +21,4 @@ public class OfferEntity {
         return offerEntity;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 }

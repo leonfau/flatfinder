@@ -1,0 +1,10 @@
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+
+telegram.token=
+telegram.client_id=
+
+immoscout.url=
+immonet.url=
